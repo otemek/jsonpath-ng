@@ -19,3 +19,5 @@ build
 
 .idea
 .vscode/
+.venv
+__pycache__
