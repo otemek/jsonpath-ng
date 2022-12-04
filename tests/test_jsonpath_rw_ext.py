@@ -22,7 +22,6 @@ Tests for `jsonpath_ng_ext` module.
 from jsonpath_ng import jsonpath  # For setting the global auto_id_field flag
 from jsonpath_ng.ext import parser
 from oslotest import base
-from six import moves
 
 # NOTE(sileht): copy of tests/test_jsonpath.py
 # to ensure we didn't break jsonpath_ng
@@ -40,7 +39,7 @@ class TestJsonPath(base.BaseTestCase):
         # Also, we coerce iterables, etc, into the desired target type
 
         for string, data, target in test_cases:
-            print('parse("%s").find(%s) =?= %s' % (string, data, target))
+            print(f'parse("{string}").find({data}) =?= {target}')
             result = parser.parse(string).find(data)
             if isinstance(target, list):
                 assert [r.value for r in result] == target
@@ -84,7 +83,7 @@ class TestJsonPath(base.BaseTestCase):
 
     def test_slice_value(self):
         self.check_cases([('[*]', [1, 2, 3], [1, 2, 3]),
-                          ('[*]', moves.range(1, 4), [1, 2, 3]),
+                          ('[*]', range(1, 4), [1, 2, 3]),
                           ('[1:]', [1, 2, 3, 4], [2, 3, 4]),
                           ('[:2]', [1, 2, 3, 4], [1, 2])])
 
@@ -139,7 +138,7 @@ class TestJsonPath(base.BaseTestCase):
         # Also, we coerce iterables, etc, into the desired target type
 
         for string, data, target in test_cases:
-            print('parse("%s").find(%s).paths =?= %s' % (string, data, target))
+            print(f'parse("{string}").find({data}).paths =?= {target}')
             result = parser.parse(string).find(data)
             if isinstance(target, list):
                 assert [str(r.full_path) for r in result] == target
