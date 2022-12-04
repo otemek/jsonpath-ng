@@ -1,4 +1,3 @@
-
 from functools import partial
 import unittest
 
@@ -9,9 +8,10 @@ from jsonpath_ng.jsonpath import DatumInContext, This, Root, Fields
 from jsonpath_ng.lexer import JsonPathLexerError
 from tests.conftest import check_cases, check_paths, check_update_cases
 
-check_cases = partial(check_cases, parser_type = parser)
+check_cases = partial(check_cases, parser_type=parser)
 check_paths = partial(check_paths, parser_type=parser)
 check_update_cases = partial(check_update_cases, parser_type=parser)
+
 
 class TestDatumInContext(unittest.TestCase):
     """
@@ -22,7 +22,7 @@ class TestDatumInContext(unittest.TestCase):
     # def setup_class(cls):
     #     logging.basicConfig()
 
-    def test_DatumInContext_init(self):
+    def test_can_initialize_object(self):
 
         test_datum1 = DatumInContext(3)
         assert test_datum1.path == This()
@@ -46,7 +46,7 @@ class TestDatumInContext(unittest.TestCase):
         assert test_datum3.path == Fields("foo")
         assert test_datum3.full_path == Fields("baz").child(Fields("foo"))
 
-    def test_DatumInContext_in_context(self):
+    def test_can_initialize_in_context(self):
 
         assert DatumInContext(3).in_context(
             path=Fields("foo"), context=DatumInContext("whatever")
@@ -100,7 +100,6 @@ class TestJsonPath(unittest.TestCase):
     # @classmethod
     # def setup_class(cls):
     #     logging.basicConfig()
-
 
     def test_fields_value(self):
         jsonpath.auto_id_field = None
@@ -212,7 +211,6 @@ class TestJsonPath(unittest.TestCase):
             [("foo.-baz", {"foo": {"-baz": 8}}, [8])],
         )
 
-
     def test_fields_paths(self):
         jsonpath.auto_id_field = None
         check_paths(
@@ -321,9 +319,7 @@ class TestJsonPath(unittest.TestCase):
 
     def test_index_auto_id(self):
         jsonpath.auto_id_field = "id"
-        check_cases(
-            [("[0].id", [42], ["[0]"]), ("[2].id", [34, 65, 29, 59], ["[2]"])]
-        )
+        check_cases([("[0].id", [42], ["[0]"]), ("[2].id", [34, 65, 29, 59], ["[2]"])])
 
     def test_slice_auto_id(self):
         jsonpath.auto_id_field = "id"
