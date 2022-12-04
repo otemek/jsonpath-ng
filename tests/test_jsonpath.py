@@ -6,14 +6,18 @@ from __future__ import (
     generators,
     nested_scopes,
 )
+from functools import partial
 import unittest
 
 from jsonpath_ng import jsonpath  # For setting the global auto_id_field flag
 
-from jsonpath_ng.parser import parse
+from jsonpath_ng import parser
 from jsonpath_ng.jsonpath import *
 from jsonpath_ng.lexer import JsonPathLexerError
+from tests.conftest import check_cases, check_paths
 
+check_cases = partial(check_cases, parser_type = parser)
+check_paths = partial(check_paths, parser_type=parser)
 
 class TestDatumInContext(unittest.TestCase):
     """
@@ -105,24 +109,24 @@ class TestJsonPath(unittest.TestCase):
 
     #
     # Check that the data value returned is good
-    #
-    def check_cases(self, test_cases):
-        # Note that just manually building an AST would avoid this dep and isolate the tests, but that would suck a bit
-        # Also, we coerce iterables, etc, into the desired target type
+    # #
+    # def check_cases(self, test_cases):
+    #     # Note that just manually building an AST would avoid this dep and isolate the tests, but that would suck a bit
+    #     # Also, we coerce iterables, etc, into the desired target type
 
-        for string, data, target in test_cases:
-            print(f'parse("{string}").find({data}) =?= {target}')
-            result = parse(string).find(data)
-            if isinstance(target, list):
-                assert [r.value for r in result] == target
-            elif isinstance(target, set):
-                assert set([r.value for r in result]) == target
-            else:
-                assert result.value == target
+    #     for string, data, target in test_cases:
+    #         print(f'parse("{string}").find({data}) =?= {target}')
+    #         result = parse(string).find(data)
+    #         if isinstance(target, list):
+    #             assert [r.value for r in result] == target
+    #         elif isinstance(target, set):
+    #             assert set([r.value for r in result]) == target
+    #         else:
+    #             assert result.value == target
 
     def test_fields_value(self):
         jsonpath.auto_id_field = None
-        self.check_cases(
+        check_cases(
             [
                 ("foo", {"foo": "baz"}, ["baz"]),
                 ("foo,baz", {"foo": 1, "baz": 2}, [1, 2]),
@@ -132,11 +136,11 @@ class TestJsonPath(unittest.TestCase):
         )
 
         jsonpath.auto_id_field = "id"
-        self.check_cases([("*", {"foo": 1, "baz": 2}, set([1, 2, "`this`"]))])
+        check_cases([("*", {"foo": 1, "baz": 2}, set([1, 2, "`this`"]))])
 
     def test_root_value(self):
         jsonpath.auto_id_field = None
-        self.check_cases(
+        check_cases(
             [
                 ("$", {"foo": "baz"}, [{"foo": "baz"}]),
                 ("foo.$", {"foo": "baz"}, [{"foo": "baz"}]),
@@ -146,7 +150,7 @@ class TestJsonPath(unittest.TestCase):
 
     def test_this_value(self):
         jsonpath.auto_id_field = None
-        self.check_cases(
+        check_cases(
             [
                 ("`this`", {"foo": "baz"}, [{"foo": "baz"}]),
                 ("foo.`this`", {"foo": "baz"}, ["baz"]),
@@ -155,7 +159,7 @@ class TestJsonPath(unittest.TestCase):
         )
 
     def test_index_value(self):
-        self.check_cases(
+        check_cases(
             [
                 ("[0]", [42], [42]),
                 ("[5]", [42], []),
@@ -165,7 +169,7 @@ class TestJsonPath(unittest.TestCase):
         )
 
     def test_slice_value(self):
-        self.check_cases(
+        check_cases(
             [
                 ("[*]", [1, 2, 3], [1, 2, 3]),
                 ("[*]", xrange(1, 4), [1, 2, 3]),
@@ -175,7 +179,7 @@ class TestJsonPath(unittest.TestCase):
         )
 
         # Funky slice hacks
-        self.check_cases(
+        check_cases(
             [
                 ("[*]", 1, [1]),  # This is a funky hack
                 ("[0:]", 1, [1]),  # This is a funky hack
@@ -185,7 +189,7 @@ class TestJsonPath(unittest.TestCase):
         )
 
     def test_child_value(self):
-        self.check_cases(
+        check_cases(
             [
                 ("foo.baz", {"foo": {"baz": 3}}, [3]),
                 ("foo.baz", {"foo": {"baz": [3]}}, [[3]]),
@@ -194,7 +198,7 @@ class TestJsonPath(unittest.TestCase):
         )
 
     def test_descendants_value(self):
-        self.check_cases(
+        check_cases(
             [
                 ("foo..baz", {"foo": {"baz": 1, "bing": {"baz": 2}}}, [1, 2]),
                 ("foo..baz", {"foo": [{"baz": 1}, {"baz": 2}]}, [1, 2]),
@@ -202,7 +206,7 @@ class TestJsonPath(unittest.TestCase):
         )
 
     def test_parent_value(self):
-        self.check_cases(
+        check_cases(
             [
                 ("foo.baz.`parent`", {"foo": {"baz": 3}}, [{"baz": 3}]),
                 (
@@ -214,7 +218,7 @@ class TestJsonPath(unittest.TestCase):
         )
 
     def test_hyphen_key(self):
-        self.check_cases(
+        check_cases(
             [
                 ("foo.bar-baz", {"foo": {"bar-baz": 3}}, [3]),
                 (
@@ -226,31 +230,14 @@ class TestJsonPath(unittest.TestCase):
         )
         self.assertRaises(
             JsonPathLexerError,
-            self.check_cases,
+            check_cases,
             [("foo.-baz", {"foo": {"-baz": 8}}, [8])],
         )
 
-    #
-    # Check that the paths for the data are correct.
-    # FIXME: merge these tests with the above, since the inputs are the same anyhow
-    #
-    def check_paths(self, test_cases):
-        # Note that just manually building an AST would avoid this dep and isolate the tests, but that would suck a bit
-        # Also, we coerce iterables, etc, into the desired target type
-
-        for string, data, target in test_cases:
-            print(f'parse("{string}").find({data}).paths =?= {target}')
-            result = parse(string).find(data)
-            if isinstance(target, list):
-                assert [str(r.full_path) for r in result] == target
-            elif isinstance(target, set):
-                assert set([str(r.full_path) for r in result]) == target
-            else:
-                assert str(result.path) == target
 
     def test_fields_paths(self):
         jsonpath.auto_id_field = None
-        self.check_paths(
+        check_paths(
             [
                 ("foo", {"foo": "baz"}, ["foo"]),
                 ("foo,baz", {"foo": 1, "baz": 2}, ["foo", "baz"]),
@@ -259,11 +246,11 @@ class TestJsonPath(unittest.TestCase):
         )
 
         jsonpath.auto_id_field = "id"
-        self.check_paths([("*", {"foo": 1, "baz": 2}, set(["foo", "baz", "id"]))])
+        check_paths([("*", {"foo": 1, "baz": 2}, set(["foo", "baz", "id"]))])
 
     def test_root_paths(self):
         jsonpath.auto_id_field = None
-        self.check_paths(
+        check_paths(
             [
                 ("$", {"foo": "baz"}, ["$"]),
                 ("foo.$", {"foo": "baz"}, ["$"]),
@@ -273,7 +260,7 @@ class TestJsonPath(unittest.TestCase):
 
     def test_this_paths(self):
         jsonpath.auto_id_field = None
-        self.check_paths(
+        check_paths(
             [
                 ("`this`", {"foo": "baz"}, ["`this`"]),
                 ("foo.`this`", {"foo": "baz"}, ["foo"]),
@@ -282,10 +269,10 @@ class TestJsonPath(unittest.TestCase):
         )
 
     def test_index_paths(self):
-        self.check_paths([("[0]", [42], ["[0]"]), ("[2]", [34, 65, 29, 59], ["[2]"])])
+        check_paths([("[0]", [42], ["[0]"]), ("[2]", [34, 65, 29, 59], ["[2]"])])
 
     def test_slice_paths(self):
-        self.check_paths(
+        check_paths(
             [
                 ("[*]", [1, 2, 3], ["[0]", "[1]", "[2]"]),
                 ("[1:]", [1, 2, 3, 4], ["[1]", "[2]", "[3]"]),
@@ -293,7 +280,7 @@ class TestJsonPath(unittest.TestCase):
         )
 
     def test_child_paths(self):
-        self.check_paths(
+        check_paths(
             [
                 ("foo.baz", {"foo": {"baz": 3}}, ["foo.baz"]),
                 ("foo.baz", {"foo": {"baz": [3]}}, ["foo.baz"]),
@@ -302,7 +289,7 @@ class TestJsonPath(unittest.TestCase):
         )
 
     def test_descendants_paths(self):
-        self.check_paths(
+        check_paths(
             [
                 (
                     "foo..baz",
@@ -317,7 +304,7 @@ class TestJsonPath(unittest.TestCase):
     #
     def test_fields_auto_id(self):
         jsonpath.auto_id_field = "id"
-        self.check_cases(
+        check_cases(
             [
                 ("foo.id", {"foo": "baz"}, ["foo"]),
                 ("foo.id", {"foo": {"id": "baz"}}, ["baz"]),
@@ -328,7 +315,7 @@ class TestJsonPath(unittest.TestCase):
 
     def test_root_auto_id(self):
         jsonpath.auto_id_field = "id"
-        self.check_cases(
+        check_cases(
             [
                 (
                     "$.id",
@@ -342,7 +329,7 @@ class TestJsonPath(unittest.TestCase):
 
     def test_this_auto_id(self):
         jsonpath.auto_id_field = "id"
-        self.check_cases(
+        check_cases(
             [
                 (
                     "id",
@@ -356,13 +343,13 @@ class TestJsonPath(unittest.TestCase):
 
     def test_index_auto_id(self):
         jsonpath.auto_id_field = "id"
-        self.check_cases(
+        check_cases(
             [("[0].id", [42], ["[0]"]), ("[2].id", [34, 65, 29, 59], ["[2]"])]
         )
 
     def test_slice_auto_id(self):
         jsonpath.auto_id_field = "id"
-        self.check_cases(
+        check_cases(
             [
                 ("[*].id", [1, 2, 3], ["[0]", "[1]", "[2]"]),
                 ("[1:].id", [1, 2, 3, 4], ["[1]", "[2]", "[3]"]),
@@ -371,7 +358,7 @@ class TestJsonPath(unittest.TestCase):
 
     def test_child_auto_id(self):
         jsonpath.auto_id_field = "id"
-        self.check_cases(
+        check_cases(
             [
                 ("foo.baz.id", {"foo": {"baz": 3}}, ["foo.baz"]),
                 ("foo.baz.id", {"foo": {"baz": [3]}}, ["foo.baz"]),
@@ -387,7 +374,7 @@ class TestJsonPath(unittest.TestCase):
 
     def test_descendants_auto_id(self):
         jsonpath.auto_id_field = "id"
-        self.check_cases(
+        check_cases(
             [
                 (
                     "foo..baz.id",
@@ -400,7 +387,7 @@ class TestJsonPath(unittest.TestCase):
     def check_update_cases(self, test_cases):
         for original, expr_str, value, expected in test_cases:
             print(f"parse({expr_str}).update({original}, {value}) =?= {expected}")
-            expr = parse(expr_str)
+            expr = parser.parse(expr_str)
             actual = expr.update(original, value)
             assert actual == expected
 

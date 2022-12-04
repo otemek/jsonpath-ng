@@ -16,6 +16,7 @@ def check_cases(test_cases: list, parser_type):
             assert result.value == target
 
 
+
 # Check that the paths for the data are correct.
 # FIXME: merge these tests with the above, since the inputs are the same
 # anyhow
