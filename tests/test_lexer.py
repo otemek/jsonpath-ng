@@ -1,12 +1,13 @@
 from ply.lex import LexToken
+import pytest
 
 # import pytest
 
 from jsonpath_ng.lexer import JsonPathLexer, JsonPathLexerError
 
 
-def token(value, token_type=None):
-    _token = LexToken()
+def token(value, token_type=None) -> LexToken:
+    _token: LexToken = LexToken()
     _token.type = token_type if token_type is not None else value
     _token.value = value
     _token.lineno = -1
@@ -16,11 +17,11 @@ def token(value, token_type=None):
 
 def assert_lex_equiv(_string, stream2):
     # NOTE: lexer fails to reset after call?
-    lexer = JsonPathLexer(debug=True)
-    stream1 = list(
+    lexer: JsonPathLexer = JsonPathLexer(debug=True)
+    stream1: list = list(
         lexer.tokenize(_string)
     )  # Save the stream for debug output when a test fails
-    stream2 = list(stream2)
+    stream2: list = list(stream2)
     assert len(stream1) == len(stream2)
     for token1, token2 in zip(stream1, stream2):
         print(token1, token2)
@@ -28,45 +29,44 @@ def assert_lex_equiv(_string, stream2):
         assert token1.value == token2.value
 
 
-def test_simple_inputs():
-    assert_lex_equiv("$", [token("$", "$")])
-    assert_lex_equiv('"hello"', [token("hello", "ID")])
-    assert_lex_equiv("'goodbye'", [token("goodbye", "ID")])
-    assert_lex_equiv("'doublequote\"'", [token('doublequote"', "ID")])
-    assert_lex_equiv(r'"doublequote\""', [token('doublequote"', "ID")])
-    assert_lex_equiv(r"'singlequote\''", [token("singlequote'", "ID")])
-    assert_lex_equiv('"singlequote\'"', [token("singlequote'", "ID")])
-    assert_lex_equiv("fuzz", [token("fuzz", "ID")])
-    assert_lex_equiv("1", [token(1, "NUMBER")])
-    assert_lex_equiv("45", [token(45, "NUMBER")])
-    assert_lex_equiv("-1", [token(-1, "NUMBER")])
-    assert_lex_equiv(" -13 ", [token(-13, "NUMBER")])
-    assert_lex_equiv('"fuzz.bang"', [token("fuzz.bang", "ID")])
-    assert_lex_equiv(
-        "fuzz.bang", [token("fuzz", "ID"), token(".", "."), token("bang", "ID")]
-    )
-    assert_lex_equiv("fuzz.*", [token("fuzz", "ID"), token(".", "."), token("*", "*")])
-    assert_lex_equiv(
-        "fuzz..bang",
-        [token("fuzz", "ID"), token("..", "DOUBLEDOT"), token("bang", "ID")],
-    )
-    assert_lex_equiv("&", [token("&", "&")])
-    assert_lex_equiv("@", [token("@", "ID")])
-    assert_lex_equiv("`this`", [token("this", "NAMED_OPERATOR")])
-    assert_lex_equiv("|", [token("|", "|")])
-    assert_lex_equiv("where", [token("where", "WHERE")])
+@pytest.mark.parametrize(
+    ["token1", "token2"],
+    [
+        ("$", [token("$", "$")]),
+        ('"hello"', [token("hello", "ID")]),
+        ("'goodbye'", [token("goodbye", "ID")]),
+        ("'doublequote\"'", [token('doublequote"', "ID")]),
+        (r'"doublequote\""', [token('doublequote"', "ID")]),
+        (r"'singlequote\''", [token("singlequote'", "ID")]),
+        ('"singlequote\'"', [token("singlequote'", "ID")]),
+        ("fuzz", [token("fuzz", "ID")]),
+        ("1", [token(1, "NUMBER")]),
+        ("45", [token(45, "NUMBER")]),
+        ("-1", [token(-1, "NUMBER")]),
+        (" -13 ", [token(-13, "NUMBER")]),
+        ('"fuzz.bang"', [token("fuzz.bang", "ID")]),
+        ("fuzz.bang", [token("fuzz", "ID"), token(".", "."), token("bang", "ID")]),
+        ("fuzz.*", [token("fuzz", "ID"), token(".", "."), token("*", "*")]),
+        (
+            "fuzz..bang",
+            [token("fuzz", "ID"), token("..", "DOUBLEDOT"), token("bang", "ID")],
+        ),
+        ("&", [token("&", "&")]),
+        ("@", [token("@", "ID")]),
+        ("`this`", [token("this", "NAMED_OPERATOR")]),
+        ("|", [token("|", "|")]),
+        ("where", [token("where", "WHERE")]),
+    ],
+)
+def test_simple_inputs(token1, token2):
+    assert_lex_equiv(token1, token2)
 
 
-# def test_basic_errors():
-#     def tokenize(s):
-#         l = JsonPathLexer(debug=True)
-#         return list(l.tokenize(s))
+def test_basic_errors():
+    def tokenize(character):
+        lexer = JsonPathLexer(debug=True)
+        return list(lexer.tokenize(character))
 
-#     self.assertRaises(JsonPathLexerError, tokenize, "'\"")
-#     self.assertRaises(JsonPathLexerError, tokenize, '"\'')
-#     self.assertRaises(JsonPathLexerError, tokenize, '`"')
-#     self.assertRaises(JsonPathLexerError, tokenize, "`'")
-#     self.assertRaises(JsonPathLexerError, tokenize, '"`')
-#     self.assertRaises(JsonPathLexerError, tokenize, "'`")
-#     self.assertRaises(JsonPathLexerError, tokenize, '?')
-#     self.assertRaises(JsonPathLexerError, tokenize, '$.foo.bar.#')
+    for _token in ["'\"", "\"'", '`"', "`'", '"`', "'`", "?", "$.foo.bar.#"]:
+        with pytest.raises(JsonPathLexerError):
+            tokenize(_token)
