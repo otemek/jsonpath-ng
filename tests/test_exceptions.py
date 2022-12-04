@@ -1,6 +1,6 @@
 import pytest
 
-from jsonpath_ng import parse as rw_parse
+from jsonpath_ng.parser import parse as rw_parse
 from jsonpath_ng.exceptions import JSONPathError, JsonPathParserError
 from jsonpath_ng.ext import parse as ext_parse
 

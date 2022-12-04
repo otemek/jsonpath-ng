@@ -11,9 +11,10 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+from jsonpath_ng.jsonpath import Fields, This, Child
 from .. import lexer
 from .. import parser
-from .. import Fields, This, Child
+# from .. import Fields, This, Child
 
 from . import arithmetic as _arithmetic
 from . import filter as _filter

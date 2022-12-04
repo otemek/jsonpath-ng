@@ -12,7 +12,7 @@
 # under the License.
 
 import operator
-from .. import JSONPath, DatumInContext
+from jsonpath_ng.jsonpath import JSONPath, DatumInContext
 
 
 OPERATOR_MAP = {

@@ -15,7 +15,7 @@ import operator
 import re
 from six import moves
 
-from .. import JSONPath, DatumInContext, Index
+from jsonpath_ng.jsonpath import JSONPath, DatumInContext, Index
 
 
 OPERATOR_MAP = {

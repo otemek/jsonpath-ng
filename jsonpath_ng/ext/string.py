@@ -12,7 +12,7 @@
 # under the License.
 
 import re
-from .. import DatumInContext, This
+from jsonpath_ng.jsonpath import DatumInContext, This
 
 
 SUB = re.compile("sub\(/(.*)/,\s+(.*)\)")

@@ -12,7 +12,7 @@
 # under the License.
 
 import functools
-from .. import This, DatumInContext, JSONPath
+from jsonpath_ng.jsonpath import This, DatumInContext, JSONPath
 
 
 class SortedThis(This):
