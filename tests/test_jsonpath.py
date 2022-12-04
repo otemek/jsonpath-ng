@@ -1,32 +1,26 @@
-from __future__ import (
-    unicode_literals,
-    print_function,
-    absolute_import,
-    division,
-    generators,
-    nested_scopes,
-)
+
 from functools import partial
 import unittest
 
 from jsonpath_ng import jsonpath  # For setting the global auto_id_field flag
 
 from jsonpath_ng import parser
-from jsonpath_ng.jsonpath import *
+from jsonpath_ng.jsonpath import DatumInContext, This, Root, Fields
 from jsonpath_ng.lexer import JsonPathLexerError
-from tests.conftest import check_cases, check_paths
+from tests.conftest import check_cases, check_paths, check_update_cases
 
 check_cases = partial(check_cases, parser_type = parser)
 check_paths = partial(check_paths, parser_type=parser)
+check_update_cases = partial(check_update_cases, parser_type=parser)
 
 class TestDatumInContext(unittest.TestCase):
     """
     Tests of properties of the DatumInContext and AutoIdForDatum objects
     """
 
-    @classmethod
-    def setup_class(cls):
-        logging.basicConfig()
+    # @classmethod
+    # def setup_class(cls):
+    #     logging.basicConfig()
 
     def test_DatumInContext_init(self):
 
@@ -103,26 +97,10 @@ class TestJsonPath(unittest.TestCase):
     Tests of the actual jsonpath functionality
     """
 
-    @classmethod
-    def setup_class(cls):
-        logging.basicConfig()
+    # @classmethod
+    # def setup_class(cls):
+    #     logging.basicConfig()
 
-    #
-    # Check that the data value returned is good
-    # #
-    # def check_cases(self, test_cases):
-    #     # Note that just manually building an AST would avoid this dep and isolate the tests, but that would suck a bit
-    #     # Also, we coerce iterables, etc, into the desired target type
-
-    #     for string, data, target in test_cases:
-    #         print(f'parse("{string}").find({data}) =?= {target}')
-    #         result = parse(string).find(data)
-    #         if isinstance(target, list):
-    #             assert [r.value for r in result] == target
-    #         elif isinstance(target, set):
-    #             assert set([r.value for r in result]) == target
-    #         else:
-    #             assert result.value == target
 
     def test_fields_value(self):
         jsonpath.auto_id_field = None
@@ -172,7 +150,7 @@ class TestJsonPath(unittest.TestCase):
         check_cases(
             [
                 ("[*]", [1, 2, 3], [1, 2, 3]),
-                ("[*]", xrange(1, 4), [1, 2, 3]),
+                ("[*]", range(1, 4), [1, 2, 3]),
                 ("[1:]", [1, 2, 3, 4], [2, 3, 4]),
                 ("[:2]", [1, 2, 3, 4], [1, 2]),
             ]
@@ -384,21 +362,14 @@ class TestJsonPath(unittest.TestCase):
             ]
         )
 
-    def check_update_cases(self, test_cases):
-        for original, expr_str, value, expected in test_cases:
-            print(f"parse({expr_str}).update({original}, {value}) =?= {expected}")
-            expr = parser.parse(expr_str)
-            actual = expr.update(original, value)
-            assert actual == expected
-
     def test_update_root(self):
-        self.check_update_cases([("foo", "$", "bar", "bar")])
+        check_update_cases([("foo", "$", "bar", "bar")])
 
     def test_update_this(self):
-        self.check_update_cases([("foo", "`this`", "bar", "bar")])
+        check_update_cases([("foo", "`this`", "bar", "bar")])
 
     def test_update_fields(self):
-        self.check_update_cases(
+        check_update_cases(
             [
                 ({"foo": 1}, "foo", 5, {"foo": 5}),
                 ({"foo": 1, "bar": 2}, "$.*", 3, {"foo": 3, "bar": 3}),
@@ -406,7 +377,7 @@ class TestJsonPath(unittest.TestCase):
         )
 
     def test_update_child(self):
-        self.check_update_cases(
+        check_update_cases(
             [
                 ({"foo": "bar"}, "$.foo", "baz", {"foo": "baz"}),
                 ({"foo": {"bar": 1}}, "foo.bar", "baz", {"foo": {"bar": "baz"}}),
@@ -414,7 +385,7 @@ class TestJsonPath(unittest.TestCase):
         )
 
     def test_update_where(self):
-        self.check_update_cases(
+        check_update_cases(
             [
                 (
                     {"foo": {"bar": {"baz": 1}}, "bar": {"baz": 2}},
@@ -426,7 +397,7 @@ class TestJsonPath(unittest.TestCase):
         )
 
     def test_update_descendants_where(self):
-        self.check_update_cases(
+        check_update_cases(
             [
                 (
                     {"foo": {"bar": 1, "flag": 1}, "baz": {"bar": 2}},
@@ -438,7 +409,7 @@ class TestJsonPath(unittest.TestCase):
         )
 
     def test_update_descendants(self):
-        self.check_update_cases(
+        check_update_cases(
             [
                 ({"somefield": 1}, "$..somefield", 42, {"somefield": 42}),
                 (
@@ -457,11 +428,11 @@ class TestJsonPath(unittest.TestCase):
         )
 
     def test_update_index(self):
-        self.check_update_cases(
+        check_update_cases(
             [(["foo", "bar", "baz"], "[0]", "test", ["test", "bar", "baz"])]
         )
 
     def test_update_slice(self):
-        self.check_update_cases(
+        check_update_cases(
             [(["foo", "bar", "baz"], "[0:2]", "test", ["test", "test", "baz"])]
         )

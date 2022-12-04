@@ -34,3 +34,11 @@ def check_paths(test_cases, parser_type):
             assert set([str(r.full_path) for r in result]) == target
         else:
             assert str(result.path) == target
+
+
+def check_update_cases(test_cases, parser_type):
+    for original, expr_str, value, expected in test_cases:
+        print(f"parse({expr_str}).update({original}, {value}) =?= {expected}")
+        expr = parser_type.parse(expr_str)
+        actual = expr.update(original, value)
+        assert actual == expected
