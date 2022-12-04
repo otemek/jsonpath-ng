@@ -21,7 +21,6 @@ Tests for `jsonpath_ng_ext` module.
 
 from jsonpath_ng import jsonpath  # For setting the global auto_id_field flag
 from jsonpath_ng.ext import parser as parser_ext
-from oslotest import base
 from tests.conftest import check_cases, check_paths
 from functools import partial
 
@@ -32,7 +31,7 @@ from functools import partial
 check_cases = partial(check_cases, parser_type=parser_ext)
 check_paths = partial(check_paths, parser_type=parser_ext)
 
-class TestJsonPath(base.BaseTestCase):
+class TestJsonPath:
     """Tests of the actual jsonpath functionality """
 
     #

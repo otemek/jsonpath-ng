@@ -1,3 +1,5 @@
+from jsonpath_ng.lexer import JsonPathLexer
+from jsonpath_ng.parser import JsonPathParser
 
 
 def check_cases(test_cases: list, parser_type):
@@ -14,7 +16,6 @@ def check_cases(test_cases: list, parser_type):
             assert set([r.value for r in result]) == target
         else:
             assert result.value == target
-
 
 
 # Check that the paths for the data are correct.
@@ -42,3 +43,15 @@ def check_update_cases(test_cases, parser_type):
         expr = parser_type.parse(expr_str)
         actual = expr.update(original, value)
         assert actual == expected
+
+
+def check_parse_cases(test_cases):
+    parser = JsonPathParser(
+        debug=True, lexer_class=lambda: JsonPathLexer(debug=False)
+    )  # Note that just manually passing token streams avoids this dep, but that sucks
+
+    for string, parsed in test_cases:
+        print(
+            f"{string} =?= {parsed}"
+        )  # pytest captures this and we see it only on a failure, for debugging
+        assert parser.parse(string) == parsed
