@@ -102,7 +102,7 @@ class TestJsonPath(unittest.TestCase):
     #     logging.basicConfig()
 
     def test_fields_value(self):
-        jsonpath.auto_id_field = None
+        jsonpath.AUTO_ID_FIELD = None
         check_cases(
             [
                 ("foo", {"foo": "baz"}, ["baz"]),
@@ -112,11 +112,11 @@ class TestJsonPath(unittest.TestCase):
             ]
         )
 
-        jsonpath.auto_id_field = "id"
+        jsonpath.AUTO_ID_FIELD = "id"
         check_cases([("*", {"foo": 1, "baz": 2}, set([1, 2, "`this`"]))])
 
     def test_root_value(self):
-        jsonpath.auto_id_field = None
+        jsonpath.AUTO_ID_FIELD = None
         check_cases(
             [
                 ("$", {"foo": "baz"}, [{"foo": "baz"}]),
@@ -126,7 +126,7 @@ class TestJsonPath(unittest.TestCase):
         )
 
     def test_this_value(self):
-        jsonpath.auto_id_field = None
+        jsonpath.AUTO_ID_FIELD = None
         check_cases(
             [
                 ("`this`", {"foo": "baz"}, [{"foo": "baz"}]),
@@ -212,7 +212,7 @@ class TestJsonPath(unittest.TestCase):
         )
 
     def test_fields_paths(self):
-        jsonpath.auto_id_field = None
+        jsonpath.AUTO_ID_FIELD = None
         check_paths(
             [
                 ("foo", {"foo": "baz"}, ["foo"]),
@@ -221,11 +221,11 @@ class TestJsonPath(unittest.TestCase):
             ]
         )
 
-        jsonpath.auto_id_field = "id"
+        jsonpath.AUTO_ID_FIELD = "id"
         check_paths([("*", {"foo": 1, "baz": 2}, set(["foo", "baz", "id"]))])
 
     def test_root_paths(self):
-        jsonpath.auto_id_field = None
+        jsonpath.AUTO_ID_FIELD = None
         check_paths(
             [
                 ("$", {"foo": "baz"}, ["$"]),
@@ -235,7 +235,7 @@ class TestJsonPath(unittest.TestCase):
         )
 
     def test_this_paths(self):
-        jsonpath.auto_id_field = None
+        jsonpath.AUTO_ID_FIELD = None
         check_paths(
             [
                 ("`this`", {"foo": "baz"}, ["`this`"]),
@@ -279,7 +279,7 @@ class TestJsonPath(unittest.TestCase):
     # Check the "auto_id_field" feature
     #
     def test_fields_auto_id(self):
-        jsonpath.auto_id_field = "id"
+        jsonpath.AUTO_ID_FIELD = "id"
         check_cases(
             [
                 ("foo.id", {"foo": "baz"}, ["foo"]),
@@ -290,7 +290,7 @@ class TestJsonPath(unittest.TestCase):
         )
 
     def test_root_auto_id(self):
-        jsonpath.auto_id_field = "id"
+        jsonpath.AUTO_ID_FIELD = "id"
         check_cases(
             [
                 (
@@ -304,7 +304,7 @@ class TestJsonPath(unittest.TestCase):
         )
 
     def test_this_auto_id(self):
-        jsonpath.auto_id_field = "id"
+        jsonpath.AUTO_ID_FIELD = "id"
         check_cases(
             [
                 (
@@ -318,11 +318,11 @@ class TestJsonPath(unittest.TestCase):
         )
 
     def test_index_auto_id(self):
-        jsonpath.auto_id_field = "id"
+        jsonpath.AUTO_ID_FIELD = "id"
         check_cases([("[0].id", [42], ["[0]"]), ("[2].id", [34, 65, 29, 59], ["[2]"])])
 
     def test_slice_auto_id(self):
-        jsonpath.auto_id_field = "id"
+        jsonpath.AUTO_ID_FIELD = "id"
         check_cases(
             [
                 ("[*].id", [1, 2, 3], ["[0]", "[1]", "[2]"]),
@@ -331,7 +331,7 @@ class TestJsonPath(unittest.TestCase):
         )
 
     def test_child_auto_id(self):
-        jsonpath.auto_id_field = "id"
+        jsonpath.AUTO_ID_FIELD = "id"
         check_cases(
             [
                 ("foo.baz.id", {"foo": {"baz": 3}}, ["foo.baz"]),
@@ -347,7 +347,7 @@ class TestJsonPath(unittest.TestCase):
         )
 
     def test_descendants_auto_id(self):
-        jsonpath.auto_id_field = "id"
+        jsonpath.AUTO_ID_FIELD = "id"
         check_cases(
             [
                 (

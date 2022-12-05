@@ -53,17 +53,17 @@ class TestJsonPath:
     #             assert result.value == target
 
     def test_fields_value(self):
-        jsonpath.auto_id_field = None
+        jsonpath.AUTO_ID_FIELD = None
         check_cases([('foo', {'foo': 'baz'}, ['baz']),
                           ('foo,baz', {'foo': 1, 'baz': 2}, [1, 2]),
                           ('@foo', {'@foo': 1}, [1]),
                           ('*', {'foo': 1, 'baz': 2}, set([1, 2]))])
 
-        jsonpath.auto_id_field = 'id'
+        jsonpath.AUTO_ID_FIELD = 'id'
         check_cases([('*', {'foo': 1, 'baz': 2}, set([1, 2, '`this`']))])
 
     def test_root_value(self):
-        jsonpath.auto_id_field = None
+        jsonpath.AUTO_ID_FIELD = None
         check_cases([
             ('$', {'foo': 'baz'}, [{'foo': 'baz'}]),
             ('foo.$', {'foo': 'baz'}, [{'foo': 'baz'}]),
@@ -71,7 +71,7 @@ class TestJsonPath:
         ])
 
     def test_this_value(self):
-        jsonpath.auto_id_field = None
+        jsonpath.AUTO_ID_FIELD = None
         check_cases([
             ('`this`', {'foo': 'baz'}, [{'foo': 'baz'}]),
             ('foo.`this`', {'foo': 'baz'}, ['baz']),
@@ -152,17 +152,17 @@ class TestJsonPath:
     #             assert str(result.path) == target
 
     def test_fields_paths(self):
-        jsonpath.auto_id_field = None
+        jsonpath.AUTO_ID_FIELD = None
         check_paths([('foo', {'foo': 'baz'}, ['foo']),
                           ('foo,baz', {'foo': 1, 'baz': 2}, ['foo', 'baz']),
                           ('*', {'foo': 1, 'baz': 2}, set(['foo', 'baz']))])
 
-        jsonpath.auto_id_field = 'id'
+        jsonpath.AUTO_ID_FIELD = 'id'
         check_paths([('*', {'foo': 1, 'baz': 2},
                            set(['foo', 'baz', 'id']))])
 
     def test_root_paths(self):
-        jsonpath.auto_id_field = None
+        jsonpath.AUTO_ID_FIELD = None
         check_paths([
             ('$', {'foo': 'baz'}, ['$']),
             ('foo.$', {'foo': 'baz'}, ['$']),
@@ -170,7 +170,7 @@ class TestJsonPath:
         ])
 
     def test_this_paths(self):
-        jsonpath.auto_id_field = None
+        jsonpath.AUTO_ID_FIELD = None
         check_paths([
             ('`this`', {'foo': 'baz'}, ['`this`']),
             ('foo.`this`', {'foo': 'baz'}, ['foo']),
@@ -199,7 +199,7 @@ class TestJsonPath:
     # Check the "auto_id_field" feature
     #
     def test_fields_auto_id(self):
-        jsonpath.auto_id_field = "id"
+        jsonpath.AUTO_ID_FIELD = "id"
         check_cases([('foo.id', {'foo': 'baz'}, ['foo']),
                           ('foo.id', {'foo': {'id': 'baz'}}, ['baz']),
                           ('foo,baz.id', {'foo': 1, 'baz': 2}, ['foo', 'baz']),
@@ -209,7 +209,7 @@ class TestJsonPath:
                            set(['1', 'baz']))])
 
     def test_root_auto_id(self):
-        jsonpath.auto_id_field = 'id'
+        jsonpath.AUTO_ID_FIELD = 'id'
         check_cases([
             ('$.id', {'foo': 'baz'}, ['$']),  # This is a wonky case that is
                                               # not that interesting
@@ -218,7 +218,7 @@ class TestJsonPath:
         ])
 
     def test_this_auto_id(self):
-        jsonpath.auto_id_field = 'id'
+        jsonpath.AUTO_ID_FIELD = 'id'
         check_cases([
             ('id', {'foo': 'baz'}, ['`this`']),  # This is, again, a wonky case
                                                  # that is not that interesting
@@ -227,17 +227,17 @@ class TestJsonPath:
         ])
 
     def test_index_auto_id(self):
-        jsonpath.auto_id_field = "id"
+        jsonpath.AUTO_ID_FIELD = "id"
         check_cases([('[0].id', [42], ['[0]']),
                           ('[2].id', [34, 65, 29, 59], ['[2]'])])
 
     def test_slice_auto_id(self):
-        jsonpath.auto_id_field = "id"
+        jsonpath.AUTO_ID_FIELD = "id"
         check_cases([('[*].id', [1, 2, 3], ['[0]', '[1]', '[2]']),
                           ('[1:].id', [1, 2, 3, 4], ['[1]', '[2]', '[3]'])])
 
     def test_child_auto_id(self):
-        jsonpath.auto_id_field = "id"
+        jsonpath.AUTO_ID_FIELD = "id"
         check_cases([('foo.baz.id', {'foo': {'baz': 3}}, ['foo.baz']),
                           ('foo.baz.id', {'foo': {'baz': [3]}}, ['foo.baz']),
                           ('foo.baz.id', {'foo': {'id': 'bizzle', 'baz': 3}},
@@ -249,7 +249,7 @@ class TestJsonPath:
                            ['foo.baz.bizzle'])])
 
     def test_descendants_auto_id(self):
-        jsonpath.auto_id_field = "id"
+        jsonpath.AUTO_ID_FIELD = "id"
         check_cases([('foo..baz.id',
                            {'foo': {
                                'baz': 1,

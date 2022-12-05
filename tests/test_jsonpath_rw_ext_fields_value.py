@@ -568,7 +568,7 @@ scenarios = [
     ids=[scenario[0] for scenario in scenarios],
 )
 def test_fields_value(tc_name, data):
-    jsonpath.auto_id_field = None
+    jsonpath.AUTO_ID_FIELD = None
     result = parser.parse(data["string"], debug=True).find(data["data"])
     if isinstance(data["target"], list):
         assert data["target"] == [r.value for r in result]

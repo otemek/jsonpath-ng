@@ -5,8 +5,10 @@ except ModuleNotFoundError:
     import tomli as toml
 
 def get_version() -> str:
-    with open("pyproject.toml", "rb") as fl:
-        config = toml.load(fl)
+    """Get package version
+    """
+    with open("pyproject.toml", "rb") as file:
+        config = toml.load(file)
     return config["tool"]["poetry"]["version"]
 
 # Current package version
